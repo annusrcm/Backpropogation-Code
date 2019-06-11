@@ -1,10 +1,6 @@
 import numpy as np
 import pandas as pd
 
-def convert_to_list(x):
-    k = []
-    k.append(x)
-    return k
 
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))
@@ -14,32 +10,37 @@ def sigmoid_derivative(x):
     return x * (1 - x)
 
 
-# Input datasets
-out_file = "data.csv"
-df = pd.read_csv(open(out_file,'r'))
-inputs = df[['X','Y','Z']]
+# output for the given equation
+def get_output(x, y, z):
+    return x * x + 4 * y + z
+
+
+# Generate data set
+data = np.random.randint(1, 5, size=(10))
+df = pd.DataFrame(columns=['X', 'Y', 'Z'])
+df['X'] = data
+df['Y'] = data
+df['Z'] = data
+
+df['output'] = df.apply(lambda k: get_output(k['X'], k['Y'], k['Z']), axis=1)
+
+inputs = df[['X', 'Y', 'Z']]
 inputs = inputs.values
 e = np.array(df['output'])
 expected_output = []
 for i in e:
     expected_output.append([i])
+expected_output = np.array(expected_output)
 
-# it converges at 100000 epoch
 epochs = 10000
 lr = 0.1
-inputLayerNeurons, hiddenLayerNeurons, outputLayerNeurons = 3, 3, 1
+input_layer_neuron, hidden_layer_neuron, output_layer_neuron = 3, 3, 1
 
 # Random weights and bias initialization
-hidden_weights = np.random.uniform(size=(inputLayerNeurons, hiddenLayerNeurons))
-hidden_bias = np.random.uniform(size=(1, hiddenLayerNeurons))
-output_weights = np.random.uniform(size=(hiddenLayerNeurons, outputLayerNeurons))
-output_bias = np.random.uniform(size=(1, outputLayerNeurons))
-
-# print("Initial hidden weights:\n {}".format(hidden_weights))
-# print("Initial hidden biases:\n {}".format(hidden_bias))
-# print("Initial output weights:\n {}".format(output_weights))
-# print("Initial output biases:\n {}".format(output_bias))
-
+hidden_weights = np.random.uniform(size=(input_layer_neuron, hidden_layer_neuron))
+hidden_bias = np.random.uniform(size=(1, hidden_layer_neuron))
+output_weights = np.random.uniform(size=(hidden_layer_neuron, output_layer_neuron))
+output_bias = np.random.uniform(size=(1, output_layer_neuron))
 
 # Training algorithm
 for _ in range(epochs):
@@ -64,11 +65,5 @@ for _ in range(epochs):
     output_bias += np.sum(d_predicted_output, axis=0, keepdims=True) * lr
     hidden_weights += inputs.T.dot(d_hidden_layer) * lr
     hidden_bias += np.sum(d_hidden_layer, axis=0, keepdims=True) * lr
-
-# print("Final hidden weights:\n {}".format(hidden_weights))
-# print("Final hidden bias:\n {}".format(hidden_bias))
-# print("Final output weights:\n {}".format(output_weights))
-# print("Final output bias:\n {}".format(output_bias))
-
 
 print("Output from neural network after {} epochs:\n {}".format(epochs, predicted_output))
